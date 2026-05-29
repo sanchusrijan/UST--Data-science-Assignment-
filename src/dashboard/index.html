@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UST Automotive Cockpit Voice Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="brightness-overlay"></div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <span class="brand">UST</span>
+                <span class="sub-brand">AUTOMOTIVE DATA SCIENCE</span>
+            </div>
+            <div class="system-status">
+                <span class="dot green"></span>
+                <span class="status-text">OFFLINE EDGE INFERENCE ENGINE ACTIVE</span>
+            </div>
+        </header>
+
+        <!-- Main Cockpit Layout -->
+        <main class="cockpit-grid">
+            <!-- Left Panel: Voice Input & Diagnostics -->
+            <section class="panel control-panel">
+                <div class="panel-header">
+                    <h2>Voice Command Assistant</h2>
+                </div>
+                
+                <div class="mic-container">
+                    <button id="mic-btn" class="mic-button">
+                        <svg class="mic-icon" viewBox="0 0 24 24">
+                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
+                        </svg>
+                        <div class="pulse-ring"></div>
+                    </button>
+                    <p id="mic-status" class="status-msg">Click to Speak a Command</p>
+                </div>
+
+                <div class="transcript-box">
+                    <label>ASR Text Transcript</label>
+                    <div id="transcript-text" class="placeholder-text">"Press the mic and try saying 'increase the volume' or 'start the vehicle'..."</div>
+                </div>
+
+                <div class="model-selector-container">
+                    <label>Inference Model Backend</label>
+                    <div class="selector-buttons">
+                        <button id="btn-onnx" class="select-btn active">ONNX MiniLM (Quantized)</button>
+                        <button id="btn-tfidf" class="select-btn">TF-IDF Baseline</button>
+                    </div>
+                </div>
+
+                <div class="diagnostics-box">
+                    <h3>Inference Diagnostics</h3>
+                    <div class="diag-grid">
+                        <div class="diag-card">
+                            <span class="diag-label">Latency</span>
+                            <span id="diag-latency" class="diag-value">-- ms</span>
+                        </div>
+                        <div class="diag-card">
+                            <span class="diag-label">Confidence</span>
+                            <span id="diag-score" class="diag-value">--</span>
+                        </div>
+                        <div class="diag-card">
+                            <span class="diag-label">Status</span>
+                            <span id="diag-status" class="diag-value">--</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Car Status Simulation widgets -->
+            <section class="panel simulation-panel">
+                <div class="panel-header">
+                    <h2>Cockpit Dashboard State</h2>
+                </div>
+                
+                <div class="widgets-grid">
+                    <!-- Engine widget -->
+                    <div class="widget engine-widget">
+                        <h3>Engine Ignition</h3>
+                        <div class="engine-display">
+                            <button id="engine-btn" class="engine-circle offline">
+                                <span class="engine-text">ENGINE</span>
+                                <span id="engine-status-text" class="engine-subtext">OFF</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Music Player widget -->
+                    <div class="widget music-widget">
+                        <h3>Media Center</h3>
+                        <div class="music-display">
+                            <div class="album-art-container">
+                                <div id="vinyl-disc" class="vinyl"></div>
+                                <div class="album-center"></div>
+                            </div>
+                            <div class="track-info">
+                                <span id="track-title" class="track-title">Playback Paused</span>
+                                <span id="track-artist" class="track-artist">Press play to start music</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Volume widget -->
+                    <div class="widget gauge-widget">
+                        <h3>Audio Volume</h3>
+                        <div class="gauge-display">
+                            <div class="circular-progress-container">
+                                <svg class="progress-ring" width="120" height="120">
+                                    <circle class="progress-ring__background" stroke="#1a1a2e" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+                                    <circle id="volume-ring" class="progress-ring__circle" stroke="#00f2fe" stroke-width="8" stroke-dasharray="314.16" stroke-dashoffset="157.08" fill="transparent" r="50" cx="60" cy="60"/>
+                                </svg>
+                                <span id="volume-val" class="gauge-value">50%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Brightness widget -->
+                    <div class="widget gauge-widget">
+                        <h3>Screen Brightness</h3>
+                        <div class="gauge-display">
+                            <div class="circular-progress-container">
+                                <svg class="progress-ring" width="120" height="120">
+                                    <circle class="progress-ring__background" stroke="#1a1a2e" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+                                    <circle id="brightness-ring" class="progress-ring__circle" stroke="#ff007f" stroke-width="8" stroke-dasharray="314.16" stroke-dashoffset="62.83" fill="transparent" r="50" cx="60" cy="60"/>
+                                </svg>
+                                <span id="brightness-val" class="gauge-value">80%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Banner/Status Widgets -->
+                <div class="alerts-container">
+                    <div id="dnd-alert" class="alert-banner dnd-banner hidden">
+                        <svg class="alert-icon" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                        <span>DO NOT DISTURB (DND) MODE ACTIVE - CALLS SILENCED</span>
+                    </div>
+
+                    <div id="call-card" class="call-status-card hidden">
+                        <div class="call-info">
+                            <span class="call-pulse"></span>
+                            <span id="call-msg">INCOMING CALL FROM: John Doe</span>
+                        </div>
+                        <div class="call-status-text" id="call-status-indicator">Ringing...</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer containing steps -->
+        <footer>
+            <p><strong>Evaluation Steps:</strong> 1. Click the microphone button and grant permission. 2. Speak one of the 10 core or 4 extension commands (e.g., "please play music na", "decrease the wolume"). 3. Observe the dynamic dashboard animation and the raw diagnostic metrics.</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
